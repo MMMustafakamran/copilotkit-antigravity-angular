@@ -14,7 +14,7 @@
   "title": "Google Antigravity Angular testing",
   "quickstartHeading": "Quickstart",
   "quickstartHeader": null,
-  "clipsToUpload": true,
+  "clipsToUpload": false,
   "guidesHeading": "Angular Guides",
   "columns": [
    "Page/Section",
@@ -22,7 +22,68 @@
   ],
   "resultColumn": 1
  },
- "sections": [],
+ "sections": [
+  {
+   "label": "Chat",
+   "cells": [
+    "Sub section"
+   ]
+  },
+  {
+   "label": "Custom Look and Feel",
+   "cells": [
+    "Sub section"
+   ]
+  },
+  {
+   "label": "Threads",
+   "cells": [
+    "Sub section"
+   ]
+  },
+  {
+   "label": "Basics",
+   "cells": [
+    "Section"
+   ]
+  },
+  {
+   "label": "Generative UI",
+   "cells": [
+    "Section"
+   ]
+  },
+  {
+   "label": "Shared state",
+   "cells": [
+    "Sub section"
+   ]
+  },
+  {
+   "label": "Human-in-the-loop",
+   "cells": [
+    "Sub section"
+   ]
+  },
+  {
+   "label": "Interactivity",
+   "cells": [
+    "Section"
+   ]
+  },
+  {
+   "label": "Agent capabilities",
+   "cells": [
+    "Section"
+   ]
+  },
+  {
+   "label": "Debugging",
+   "cells": [
+    "Sub section"
+   ]
+  }
+ ],
  "pages": [
   {
    "id": "quickstart",
@@ -44,8 +105,8 @@
     {
      "text": "Not Working",
      "clip": "ANTIGRAVITY-angular-01-Quickstart",
-     "loom": null,
-     "filmed": null
+     "loom": "https://www.loom.com/share/73a25a9676ad47a196e1f2553aa07ea5",
+     "filmed": "2026-11-19"
     }
    ]
   },
@@ -67,8 +128,8 @@
     {
      "text": "Prebuilt Components - Angular",
      "clip": "ANTIGRAVITY-angular-02-PrebuiltComponents",
-     "loom": null,
-     "filmed": null
+     "loom": "https://www.loom.com/share/c97e6eae689c47f7ab15d2b96e8ccef4",
+     "filmed": "2026-11-18"
     }
    ]
   },
@@ -88,8 +149,8 @@
     {
      "text": "Multimodal Attachments - Angular",
      "clip": "ANTIGRAVITY-angular-03-MultimodalAttachments",
-     "loom": null,
-     "filmed": null
+     "loom": "https://www.loom.com/share/2a51066f43a04a9ca2e84e917669339e",
+     "filmed": "2026-11-19"
     }
    ]
   },
@@ -113,8 +174,8 @@
     {
      "text": "Issue",
      "clip": "ANTIGRAVITY-angular-04-Voice",
-     "loom": null,
-     "filmed": null
+     "loom": "https://www.loom.com/share/cc0489dba1ae44c19cf10b01dd38119c",
+     "filmed": "2026-11-19"
     }
    ]
   },
@@ -134,8 +195,8 @@
     {
      "text": "CSS Customization - Angular",
      "clip": "ANTIGRAVITY-angular-05-ClfCss",
-     "loom": null,
-     "filmed": null
+     "loom": "https://www.loom.com/share/66a4494ab39c48abad9e6b55fd80d5e6",
+     "filmed": "2026-11-19"
     }
    ]
   },
@@ -155,8 +216,8 @@
     {
      "text": "Slots (Subcomponents) - Angular",
      "clip": "ANTIGRAVITY-angular-06-ClfSlots",
-     "loom": null,
-     "filmed": null
+     "loom": "https://www.loom.com/share/8a442e835c4b4b28a0d4166195d74277",
+     "filmed": "2026-11-18"
     }
    ]
   },
@@ -176,8 +237,8 @@
     {
      "text": "Headless UI - Angular",
      "clip": "ANTIGRAVITY-angular-07-ClfHeadlessUi",
-     "loom": null,
-     "filmed": null
+     "loom": "https://www.loom.com/share/f0c8e975a8a34afc8bd8218897ccf063",
+     "filmed": "2026-11-18"
     }
    ]
   },
@@ -201,8 +262,8 @@
     {
      "text": "Issue",
      "clip": "ANTIGRAVITY-angular-08-ThreadsDrawer",
-     "loom": null,
-     "filmed": null
+     "loom": "https://www.loom.com/share/a0691f664c25495292d12f04dcb1b623",
+     "filmed": "2026-11-18"
     }
    ]
   },
@@ -226,8 +287,8 @@
     {
      "text": "Issue",
      "clip": "ANTIGRAVITY-angular-09-HeadlessThreads",
-     "loom": null,
-     "filmed": null
+     "loom": "https://www.loom.com/share/5f2d2d46b53a406cb559d150a1ee30d9",
+     "filmed": "2026-11-19"
     }
    ]
   },
@@ -249,8 +310,8 @@
     {
      "text": "Frontend Tools - Angular",
      "clip": "ANTIGRAVITY-angular-10-FrontendTools",
-     "loom": null,
-     "filmed": null
+     "loom": "https://www.loom.com/share/03a228f6da524998aa9a3c1745014018",
+     "filmed": "2026-11-18"
     }
    ]
   },
@@ -270,8 +331,8 @@
     {
      "text": "Components as Tools - Angular",
      "clip": "ANTIGRAVITY-angular-11-GenUiToolBased",
-     "loom": null,
-     "filmed": null
+     "loom": "https://www.loom.com/share/6fb65c29144e4d9fa6b6813f14450242",
+     "filmed": "2026-11-18"
     }
    ]
   },
@@ -295,8 +356,8 @@
     {
      "text": "Issue",
      "clip": "ANTIGRAVITY-angular-12-GenUiToolRendering",
-     "loom": null,
-     "filmed": null
+     "loom": "https://www.loom.com/share/3778f0751c3a4506926d6c9f87446fe7",
+     "filmed": "2026-11-19"
     }
    ]
   },
@@ -320,8 +381,8 @@
     {
      "text": "Issue",
      "clip": "ANTIGRAVITY-angular-13-A2ui",
-     "loom": null,
-     "filmed": null
+     "loom": "https://www.loom.com/share/cfa01b76641b4daf996fd48c627b44d0",
+     "filmed": "2026-11-18"
     }
    ]
   },
@@ -345,8 +406,8 @@
     {
      "text": "Issue",
      "clip": "ANTIGRAVITY-angular-14-McpApps",
-     "loom": null,
-     "filmed": null
+     "loom": "https://www.loom.com/share/9daa3b133a114b388caae119d3875086",
+     "filmed": "2026-11-19"
     }
    ]
   },
@@ -370,8 +431,8 @@
     {
      "text": "Issue",
      "clip": "ANTIGRAVITY-angular-15-OpenGenerativeUi",
-     "loom": null,
-     "filmed": null
+     "loom": "https://www.loom.com/share/3a63d08ff1cb4aa3a2efeb2f96b569d4",
+     "filmed": "2026-11-19"
     }
    ]
   },
@@ -395,8 +456,8 @@
     {
      "text": "Issue",
      "clip": "ANTIGRAVITY-angular-16-SharedState",
-     "loom": null,
-     "filmed": null
+     "loom": "https://www.loom.com/share/8cfd9277055a46bb87e25ef3c15250e1",
+     "filmed": "2026-11-18"
     }
    ]
   },
@@ -420,8 +481,8 @@
     {
      "text": "Issue",
      "clip": "ANTIGRAVITY-angular-17-AgentReadonly",
-     "loom": null,
-     "filmed": null
+     "loom": "https://www.loom.com/share/fccb7fe81d0f4b3180cb34098fb4b4c9",
+     "filmed": "2026-11-19"
     }
    ]
   },
@@ -443,8 +504,8 @@
     {
      "text": "HITL Overview - Angular",
      "clip": "ANTIGRAVITY-angular-18-HitlOverview",
-     "loom": null,
-     "filmed": null
+     "loom": "https://www.loom.com/share/e7a3cce1031c4f02ae4f983d04d660e0",
+     "filmed": "2026-11-18"
     }
    ]
   },
@@ -468,8 +529,8 @@
     {
      "text": "Issue",
      "clip": "ANTIGRAVITY-angular-19-UseInterrupt",
-     "loom": null,
-     "filmed": null
+     "loom": "https://www.loom.com/share/343ba58106394cc2948ea99aae102625",
+     "filmed": "2026-11-18"
     }
    ]
   },
@@ -493,8 +554,8 @@
     {
      "text": "Issue",
      "clip": "ANTIGRAVITY-angular-20-HeadlessInterrupts",
-     "loom": null,
-     "filmed": null
+     "loom": "https://www.loom.com/share/b2b8c09796cf461696d43e2edb41dc0d",
+     "filmed": "2026-11-19"
     }
    ]
   },
@@ -516,8 +577,8 @@
     {
      "text": "WebMCP - Angular",
      "clip": "ANTIGRAVITY-angular-21-WebMcp",
-     "loom": null,
-     "filmed": null
+     "loom": "https://www.loom.com/share/4a54f37d759b4135ac5d5e52a0b509c9",
+     "filmed": "2026-11-18"
     }
    ]
   },
@@ -541,8 +602,8 @@
     {
      "text": "Issue",
      "clip": "ANTIGRAVITY-angular-22-SubAgents",
-     "loom": null,
-     "filmed": null
+     "loom": "https://www.loom.com/share/94685b920f934d72ae35d7de472f5f58",
+     "filmed": "2026-11-19"
     }
    ]
   },
@@ -564,8 +625,8 @@
     {
      "text": "Authentication - Angular",
      "clip": "ANTIGRAVITY-angular-23-Auth",
-     "loom": null,
-     "filmed": null
+     "loom": "https://www.loom.com/share/4389d6c02ca24f4b89c1fa98262c6c31",
+     "filmed": "2026-11-18"
     }
    ]
   },
@@ -585,8 +646,8 @@
     {
      "text": "Inspector - Angular",
      "clip": "ANTIGRAVITY-angular-24-Inspector",
-     "loom": null,
-     "filmed": null
+     "loom": "https://www.loom.com/share/99d536976d904049b42124135ce3f7f1",
+     "filmed": "2026-11-18"
     }
    ]
   }
