@@ -8,7 +8,7 @@
  * showFinding). ✅ pages are plain working takes (AUTORECORDER.md sections 2-3).
  */
 import { execFile } from 'node:child_process';
-import { appendFileSync, mkdirSync } from 'node:fs';
+import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { type Page } from 'playwright';
 
@@ -27,41 +27,29 @@ import { glideClick, glideTo } from './glide-click';
 
 export const FINDING_EVIDENCE: Record<string, DocEvidence[]> = {
   quickstart: [
-    { text: 'AGENT_REGISTRY = build_registry()', caption: 'build_registry is never defined; _common.py has no imports or constants (FINDINGS.md #1)' },
-    { text: 'Expose the selected backend through Copilot Runtime', caption: 'The runtime step is only this (collapsed) callout; the linked guide shows a Next.js route, no Angular server' },
-  ],
-  'gen-ui-tool-rendering': [
-    { text: 'fetch(`/api/weather?city=${encodeURIComponent(city)}`', caption: 'The handler fetches /api/weather; the page never shows or links that endpoint' },
-    { text: 'then the city and the tool result', caption: 'Promised result; the card shows the app index.html instead of weather' },
-  ],
-  a2ui: [
-    { text: 'catalog: productCatalog,', caption: 'productCatalog is never defined anywhere on the page' },
-    { text: 'A catalog is required: without one, A2UI stays off even when the runtime', caption: 'So following the page, A2UI stays off' },
+    { text: 'AGENT_REGISTRY = build_registry()', caption: 'Backend is a fragment: build_registry is never defined; _common.py has no imports or constants (FINDINGS.md #1)' },
+    { text: 'Expose the selected backend through Copilot Runtime', caption: 'Runtime step is only this callout; no Node runtime server or start command for Angular, the runtime guide loops back here' },
   ],
   'open-generative-ui': [
-    { text: 'Generated code runs in a sandboxed iframe without same-origin access.', caption: 'Only the frontend provider is shown; no sandboxed UI ever renders' },
-  ],
-  'mcp-apps': [
-    { text: 'MCP resource and tool requests travel through the selected AG-UI agent.', caption: 'No MCP server, no runtime mcpApps config, no agent change shown' },
+    // The rendered <p> breaks the line after "sandboxed" (raw text node has a newline), so the needle stops there.
+    { text: 'object opts the frontend into the built-in sandboxed', caption: 'Only the frontend config is shown; the runtime openGenerativeUI flag that turns it on is never shown' },
   ],
   // --- shared-state / agent-readonly / hitl / interrupts / sub-agents (2026-11-18) ---
   'shared-state': [
-    { text: 'then ask the agent for the current priority', caption: 'Page promises the agent answers "high" after agent.setState; the Antigravity agent never sees the state' },
+    { text: 'then ask the agent for the current priority', caption: 'Agent never sees agent.setState state: Antigravity needs experimental_app_state=True + a get_shared_state prompt, never shown' },
   ],
   'agent-readonly': [
-    { text: 'connectAgentContext(() => ({', caption: 'Context is registered, but the Antigravity agent never receives it' },
+    { text: 'connectAgentContext(() => ({', caption: 'Values never reach the agent: needs experimental_app_context=True + a get_app_context instruction, never shown' },
   ],
   'use-interrupt': [
-    { text: 'When the backend agent pauses for input', caption: 'No page shows an Antigravity backend that pauses / emits an interrupt' },
-    { text: 'injectInterrupt<ReviewRequest>("default")', caption: 'The default (quickstart) agent never interrupts; payload shape (title, choices) never shown' },
+    { text: 'When the backend agent pauses for input', caption: 'No Antigravity backend that pauses is shown or linked' },
+    { text: 'injectInterrupt<ReviewRequest>("default")', caption: 'So the default agent never interrupts and this never fires' },
+  ],
+  'clf-headless-ui': [
+    { text: 'await this.copilotKit.core.runAgent({ agent });', caption: 'ng serve fails TS2739 on this line with today packages: @copilotkit/angular 0.6.0 pins @ag-ui/client 1.0.2, core 1.89.0 uses 1.0.5 (FINDINGS.md #14)' },
   ],
   'headless-interrupts': [
-    { text: 'When the backend agent emits an AG-UI interrupt', caption: 'No backend that emits an interrupt is shown' },
-    { text: 'injectAgentStore("ticketing")', caption: 'No "ticketing" agent is registered anywhere on the page' },
-  ],
-  'multi-agent-subagents': [
-    { text: 'pip install ag-ui-antigravity google-antigravity', caption: 'subagents.py imports httpx, which this install never installs (ModuleNotFoundError)' },
-    { text: 'readDelegations(this.agentStore().state())', caption: 'Frontend snippet is a class fragment: readDelegations, subAgentRendererConfig, SubAgentName never defined' },
+    { text: 'When the backend agent emits an AG-UI interrupt', caption: 'No Antigravity interrupt backend is shown or linked, so nothing appears' },
   ],
 };
 // Doc step highlights these before the IDE (no KNOWN_ISSUE set in this repo, so no skip list).
@@ -71,14 +59,8 @@ export const FINDING_NOTES: Record<string, string> = {
   quickstart: [
     "page says connect the antigravity backend then run backend runtime and angular app and chat works",
     "following just the page theres nothing to run, chat only answers on a backend and runtime i put together myself",
-    "_common.py has no imports and no constants like MODEL WORKSPACE SLUG, agent_server.py calls build_registry which is never defined",
-    "runtime step is only a callout,the linked runtime page only has a next.js route so no server for angular and no command to start it",
-  ].join('\n'),
-  'gen-ui-tool-rendering': [
-    "page says ask for weather in paris and the card shows loading then the city and the tool result",
-    "card does render but the result line is a whole html page,the angular index.html",
-    "handler fetches /api/weather?city= but the page never gives that endpoint or says where it comes from",
-    "so the tool never returns weather, u have to write your own weather api to make it work",
+    "backend snippet is a fragment,no imports no constants and build_registry is never defined",
+    "and theres no node runtime server or start command for angular,the runtime guide just loops back to the quickstart",
   ].join('\n'),
   a2ui: [
     "page says pass your catalog thru provideCopilotKit a2ui and the chat renders your catalog components",
@@ -87,10 +69,10 @@ export const FINDING_NOTES: Record<string, string> = {
     "page itself says without a catalog a2ui stays off,so as written theres nothing to render with",
   ].join('\n'),
   'open-generative-ui': [
-    "page says add openGenerativeUI with sandboxFunctions and the agent streams sandboxed html into the chat",
-    "asked for 3 filter buttons,no sandbox iframe ever shows,agent just writes html buttons into the message and they dont do anything",
-    "asked straight out and the agent says it has no generatesandboxedui tool",
-    "page only shows the angular provider,nothing about turning open generative ui on in the runtime",
+    "page says add openGenerativeUI and the agent streams sandboxed ui into the chat",
+    "asked for 3 filter buttons,agent says it generated the ui above but no sandbox iframe ever shows,just text",
+    "page only shows the frontend config",
+    "the runtime openGenerativeUI flag that actually turns it on is never shown so nothing sandboxed renders",
   ].join('\n'),
   'mcp-apps': [
     "page says add provideMCPApps and the chat renders the app resources an mcp server returns",
@@ -100,27 +82,36 @@ export const FINDING_NOTES: Record<string, string> = {
   ].join('\n'),
   // --- shared-state / agent-readonly / hitl / interrupts / sub-agents (2026-11-18) ---
   'shared-state': [
-    'page says click mark high priority then ask the agent and it answers high',
-    'panel shows priority high but the agent says it doesnt have enough context to tell which priority',
-    'agent.setState never reaches the antigravity agent,state isnt passed to the model',
-    'page shows only the angular side, nothing on the backend reads state',
+    "page says click mark high priority then ask the agent and it answers high",
+    "panel shows priority high but the agent never answers,run ends with no reply",
+    "backend log says model produced invalid output,improper format stop reason",
+    "agent never sees state from agent.setState",
+    "antigravity needs experimental_app_state true plus a prompt to call get_shared_state,angular page never shows that",
   ].join('\n'),
   'agent-readonly': [
-    'page says connectAgentContext sends app values like name and timezone to the agent',
-    'clicked use london time and asked, agent doesnt know ada or london or the selected record',
-    'the context is registered in the browser but the antigravity agent never gets it',
-    'no backend step on the page to read the context',
+    "page says connectAgentContext sends app values like name and timezone to the agent",
+    "clicked use london time and asked,the agent never answers,no reply at all",
+    "backend log says model produced invalid output,improper format stop reason",
+    "values never reach the agent",
+    "antigravity needs experimental_app_context true and an instruction to call get_app_context,never shown on the page",
   ].join('\n'),
   'use-interrupt': [
-    'page says when the backend agent pauses injectInterrupt gives u the pending decision',
-    'with just the page nothing pauses,the default agent never sends an interrupt',
-    'page never shows an antigravity backend that interrupts or what payload gives title and choices',
-    'i wrote a harness interrupt tool,panel shows only review required and cancel,no title or choices',
+    "page says when the backend agent pauses injectInterrupt gives u the pending decision",
+    "following the page nothing pauses so nothing ever shows up",
+    "no antigravity backend that pauses is shown or linked anywhere",
+    "so injectInterrupt default never fires,i had to write my own interrupt agent to see the panel",
+  ].join('\n'),
+  'clf-headless-ui': [
+    "page says call copilotKit.core.runAgent with the agent and the headless chat sends ur message",
+    "with todays install ng serve wont even compile,ts2739 type abstractagent is missing _threadId maxEnforcedEntries",
+    "angular 0.6.0 pins ag-ui client 1.0.2 exact but core 1.89 uses 1.0.5,so u get two copies of abstractagent",
+    "the runAgent line straight from the page is what breaks,i had to cast it to get the rest of the app building",
   ].join('\n'),
   'headless-interrupts': [
-    'page says store interruptController holds the pending decision when the backend interrupts',
-    'injectAgentStore ticketing but no ticketing agent exists anywhere and no backend that interrupts',
-    'had to register ticketing on my own interrupt agent to see anything,then approve resumes the run',
+    "page says when the backend emits an interrupt the agent store holds the pending decision",
+    "following the page nothing appears,no pending decision",
+    "no antigravity interrupt backend is shown or linked",
+    "had to write my own interrupt agent to see approve and reject",
   ].join('\n'),
   'multi-agent-subagents': [
     'page says pip install ag-ui-antigravity google-antigravity then run subagents.py',
@@ -130,7 +121,17 @@ export const FINDING_NOTES: Record<string, string> = {
   ].join('\n'),
 };
 
+/** Status per page from assignment.json: the Notepad tail runs only on ❌/⚠️ pages (AUTORECORDER.md section 3). */
+function pageStatus(id: string): string {
+  try {
+    const a = JSON.parse(readFileSync(join(import.meta.dirname, '..', '..', 'assignment.json'), 'utf-8')) as { pages: { id: string; status?: string }[] };
+    return a.pages.find((p) => p.id === id)?.status ?? '';
+  } catch { return ''; }
+}
+
 async function writeFinding(page: Page, id: string, config: Parameters<PageActionHandler>[1]): Promise<void> {
+  const st = pageStatus(id);
+  if (!st.includes('❌') && !st.includes('⚠')) return; // ✅ take: no Notepad
   await showFinding(page, config, FINDING_EVIDENCE[id], FINDING_NOTES[id]);
 }
 
@@ -335,18 +336,38 @@ export const runToolRenderingAction: PageActionHandler = async (page, config, _r
   await settle(page, msgCount, ctx);
   if (!shown) {
     mark('error');
-    await writeFinding(page, config.id, config);
     ctx.fail('The weather card never reached "complete": getWeather did not render.');
     return;
   }
   const result = ((await card.locator('p').innerText().catch(() => '')) || '').trim();
   await glideTo(page, card, 2500);
-  const broken = !result || /<!doctype html|<html/i.test(result);
-  if (broken) mark('error');
+  // ✅ + Note (owner, 2026-11-20): /api/weather is the reader's own placeholder endpoint; the card rendering is the feature.
+  if (!result || /<!doctype html|<html/i.test(result)) ctx.warn(`Card rendered; tool result is not weather ("${result.slice(0, 60)}"): /api/weather is a placeholder the page doesn't provide.`);
   await sleep(1500);
-  await writeFinding(page, config.id, config);
-  if (broken) ctx.fail(`The weather card's tool result is not weather: "${result.slice(0, 100)}" (/api/weather is never provided by the page, so fetch gets the app's index.html).`);
 };
+
+
+/** Observed facts for a failure text: which runtime URLs the page called and what its /info says (no secrets). */
+async function runtimeInfo(page: Page): Promise<string> {
+  const urls = await page
+    .evaluate(() => [...new Set(performance.getEntriesByType('resource').map((e) => e.name).filter((u) => /:828\d\//.test(u)).map((u) => u.replace(/\?.*$/, '')))])
+    .catch(() => [] as string[]);
+  const base = (urls.find((u) => /\/api\/copilotkit/.test(u)) ?? '').replace(/(\/api\/copilotkit).*$/, '$1');
+  let info = '';
+  if (base) {
+    info = await page
+      .evaluate(async (u) => {
+        try {
+          const r = await fetch(`${u}/info`);
+          const j: any = await r.json().catch(() => ({}));
+          const pick = { status: r.status, audioFileTranscriptionEnabled: j.audioFileTranscriptionEnabled, threadEndpoints: j.threadEndpoints, a2ui: j.a2ui, mcpApps: j.mcpApps ?? j.mcpServers, agents: Object.keys(j.agents ?? {}) };
+          return JSON.stringify(pick);
+        } catch (e) { return `info fetch failed: ${String(e)}`; }
+      }, base)
+      .catch(() => '');
+  }
+  return `Runtime calls: ${urls.slice(0, 6).join(', ') || 'none'}; ${base || 'runtime'}/info: ${info || 'n/a'}`;
+}
 
 /** A2UI: ask for a catalog component; A2UI stays off without the never-defined catalog. */
 export const runA2uiAction: PageActionHandler = async (page, config, root, ctx) => {
@@ -360,7 +381,7 @@ export const runA2uiAction: PageActionHandler = async (page, config, root, ctx) 
   await sleep(1500);
   await typecheck(root, 'a2ui');
   await writeFinding(page, config.id, config);
-  if (!rendered) ctx.fail(`No A2UI surface rendered, the agent answered in text: "${reply.slice(0, 120)}". The page's productCatalog is never defined, and without a catalog "A2UI stays off".`);
+  if (!rendered) ctx.fail(`No A2UI surface rendered; the agent's reply text: "${reply.slice(0, 120)}". ${await runtimeInfo(page)}`);
 };
 
 /** MCP Apps: provideMCPApps() alone; the page gives no MCP server, so no app resource can come back. */
@@ -374,7 +395,7 @@ export const runMcpAppsAction: PageActionHandler = async (page, config, _root, c
   if (!rendered) mark('error');
   await sleep(1500);
   await writeFinding(page, config.id, config);
-  if (!rendered) ctx.fail(`No MCP app rendered, the agent answered in text: "${reply.slice(0, 120)}". The page never says which MCP server to connect or where (no runtime mcpApps config).`);
+  if (!rendered) ctx.fail(`No MCP app rendered; the agent's reply text: "${reply.slice(0, 120)}". ${await runtimeInfo(page)}`);
 };
 
 /** Open Generative UI: the sandboxed iframe must render; clicking a button calls setDashboardFilter. */
@@ -445,27 +466,50 @@ export const runAttachmentsAction: PageActionHandler = async (page, config, root
   await glideTo(page, page.locator('copilot-chat-assistant-message').last(), 2500);
 };
 
-const MIC_SELECTOR = ['transcri', 'voice', 'microphone', 'dictat', 'record', 'audio']
-  .map((k) => `copilot-chat-input button[aria-label*="${k}" i]`)
-  .join(', ');
-
-/** Voice: the page promises a mic button in the composer; there is none without a transcription service the page never shows. */
+/**
+ * Voice: the demo uses the real mic. The take's browser plays `fakeMicWav` (pages.config.ts) as the
+ * microphone; click Transcribe, let the prompt play, click Finish, the runtime's transcription
+ * service fills the composer, then send it and wait for the reply.
+ */
 export const runVoicePageAction: PageActionHandler = async (page, config, _root, ctx) => {
-  let hasMic = false;
-  try {
-    const msgCount = await sendPrompt(page, config.prompt, { timeoutMs: 15000 });
-    await settle(page, msgCount, ctx);
-    hasMic = (await page.locator(MIC_SELECTOR).count()) > 0;
-    await glideTo(page, page.locator('copilot-chat-input, textarea').first(), 2500);
-    if (!hasMic) mark('error', 'no mic button in the composer');
-  } finally {
-    await writeFinding(page, config.id, config);
-  }
+  const startBtn = page.locator('copilot-chat-input button[aria-label="Transcribe"]').first();
+  const finishBtn = page.locator('copilot-chat-input button[aria-label="Finish"]').first();
+  const input = page.locator('copilot-chat-input textarea').first();
+  const hasMic = await startBtn.waitFor({ state: 'visible', timeout: 30000 }).then(() => true, () => false);
   if (!hasMic) {
-    ctx.fail(
-      'No mic button in the composer: /info reports audioFileTranscriptionEnabled: false. The page links "Voice backend setup" to its own #backend anchor, which does not exist, and shows no transcriptionService code.',
-    );
+    mark('error', 'no mic button in the composer');
+    ctx.fail(`No mic button in the composer. ${await runtimeInfo(page)}`);
+    await writeFinding(page, config.id, config);
+    return;
   }
+  const msgCount = await page.locator('copilot-chat-assistant-message').count();
+  await glideClick(page, startBtn);
+  mark('action', 'mic on: speaking the prompt');
+  await finishBtn.waitFor({ state: 'visible', timeout: 10000 }).catch(() => {});
+  await sleep(5500); // the wav: 0.3 s lead-in, ~3.7 s of speech, then silence
+  await glideClick(page, finishBtn);
+  mark('action', 'mic off: transcribing');
+  let text = '';
+  const until = Date.now() + 45000;
+  while (Date.now() < until && !text) {
+    text = (await input.inputValue().catch(() => '')).trim();
+    if (!text) await sleep(500);
+  }
+  console.log(`   🎙️ Transcribed: "${text}"`);
+  if (!text) {
+    mark('error', 'transcription left the composer empty');
+    ctx.fail(`Nothing was transcribed into the composer. ${await runtimeInfo(page)}`);
+    await writeFinding(page, config.id, config);
+    return;
+  }
+  await glideTo(page, input, 1500);
+  await page.keyboard.press('Enter');
+  await settle(page, msgCount, ctx);
+  const reply = (await page.locator('copilot-chat-assistant-message').last().innerText().catch(() => '')) || '';
+  console.log(`   💬 Reply: "${reply.slice(0, 200)}"`);
+  if (!reply.trim()) ctx.fail(`No reply to the transcribed prompt "${text}".`);
+  await glideTo(page, page.locator('copilot-chat-assistant-message').last(), 2500);
+  await writeFinding(page, config.id, config);
 };
 
 /** CSS customization: user bubble blue (#2563eb), assistant bubble pale blue (#eff6ff). */
@@ -497,31 +541,41 @@ export const runSlotsAction: PageActionHandler = async (page, config, _root, ctx
   else await glideTo(page, custom.last(), 2500);
 };
 
-/** Headless UI: type in the hand-written textarea, click Send, the reply appears as an article. */
-export const runHeadlessUiAction: PageActionHandler = async (page, config, _root, ctx) => {
-  await sendPrompt(page, config.prompt, {
-    timeoutMs: 15000,
-    inputSelector: 'app-headless-chat textarea[aria-label="Message"]',
-    submitSelector: 'app-headless-chat button:has-text("Send")',
-    messageSelector: 'app-headless-chat article[data-role="assistant"]',
-  });
-  const replied = await page
-    .waitForFunction(
-      () => {
-        const a = document.querySelectorAll('app-headless-chat article[data-role="assistant"]');
-        return a.length > 0 && (a[a.length - 1].textContent ?? '').trim().length > 0;
-      },
-      undefined,
-      { timeout: 90000 },
-    )
-    .then(() => true)
-    .catch(() => false);
-  await page
-    .waitForFunction(() => !document.querySelector('app-headless-chat')?.textContent?.includes('Agent is working'), undefined, { timeout: 60000 })
-    .catch(() => {});
-  await sleep(1500);
-  if (!replied) ctx.fail('No assistant reply appeared in the headless transcript.');
-  else await glideTo(page, page.locator('app-headless-chat article[data-role="assistant"]').last(), 2500);
+/**
+ * Headless UI (FINDINGS.md #14): with today's packages the page's `runAgent({ agent })` line fails
+ * ng serve with TS2739 (@copilotkit/angular 0.6.0 pins @ag-ui/client 1.0.2, core 1.89.0 uses 1.0.5).
+ * The shared app keeps a HARNESS cast so the other pages build; for this take the verbatim line is put
+ * back, the real compile error shows (overlay + logs/angular-4280.log), and the cast is restored in
+ * `finally`. Pages record one at a time, so the broken build costs no other take.
+ */
+export const runHeadlessUiAction: PageActionHandler = async (page, config, root, ctx) => {
+  const file = join(root, 'frontend', 'src', 'app', 'features', 'headless', 'headless-chat.component.ts');
+  const log = join(root, 'logs', 'angular-4280.log');
+  const cast = 'runAgent({ agent: agent as any })';
+  const src = readFileSync(file, 'utf8');
+  const logLen = () => (existsSync(log) ? readFileSync(log, 'utf8').length : 0);
+  const from = logLen();
+  let seen = false;
+  try {
+    if (!src.includes(cast)) ctx.warn('HARNESS cast not found in headless-chat.component.ts');
+    writeFileSync(file, src.replace(cast, 'runAgent({ agent })'));
+    for (let i = 0; i < 90 && !seen; i++) {
+      await sleep(1000);
+      seen = existsSync(log) && readFileSync(log, 'utf8').slice(from).includes('TS2739');
+    }
+    await page.reload().catch(() => null);
+    const overlay = await page.locator('vite-error-overlay').first()
+      .waitFor({ state: 'attached', timeout: 20000 }).then(() => true).catch(() => false);
+    mark('error', "TS2739: Type 'AbstractAgent' is missing the following properties from type 'AbstractAgent'");
+    await sleep(6000);
+    if (!seen) ctx.warn('TS2739 never appeared in logs/angular-4280.log');
+    if (!overlay) ctx.warn('No vite-error-overlay after the reload');
+    await writeFinding(page, config.id, config);
+  } finally {
+    writeFileSync(file, src);
+    await page.waitForEvent('load', { timeout: 20000 }).catch(() => null);
+  }
+  ctx.fail("ng serve fails to compile the page's runAgent({ agent }): TS2739: Type 'AbstractAgent' is missing the following properties from type 'AbstractAgent': _threadId, _maxEnforcedEntries, maxEnforcedEntries (two @ag-ui/client copies: @copilotkit/angular 0.6.0 pins 1.0.2, @copilotkit/core 1.89.0 uses 1.0.5).");
 };
 
 /** Threads Drawer: the drawer lists the conversation next to the chat. */
@@ -530,12 +584,24 @@ export const runThreadsDrawerAction: PageActionHandler = async (page, config, _r
   await settle(page, msgCount, ctx);
   await sleep(3000);
   const drawer = page.locator('copilot-threads-drawer').first();
-  const text = (await drawer.innerText().catch(() => '')).trim();
+  // The drawer is a web component (shadow DOM) that may start collapsed behind a launcher: open it like a reader would.
+  const opener = drawer.getByRole('button', { name: /open.*(thread|drawer|conversation)/i }).first();
+  if (await opener.isVisible().catch(() => false)) {
+    await glideClick(page, opener).catch(async () => opener.click({ force: true }).catch(() => {}));
+    await sleep(2000);
+  }
+  // String body (not a closure): tsx's __name helper does not exist in the browser.
+  const text = (
+    await drawer
+      .evaluate((el) => new Function('el', "const w=(n)=>n.nodeType===3?(n.textContent||''):[...((n.shadowRoot&&n.shadowRoot.childNodes)||[]),...n.childNodes].map(w).join(' ');return w(el);")(el) as string)
+      .catch((e) => `evaluate failed: ${String(e).slice(0, 80)}`)
+  ).replace(/\s+/g, ' ').trim();
   await glideTo(page, drawer, 2500);
   ctx.warn(`Drawer text: ${text.slice(0, 300).replace(/\s+/g, ' ')}`);
-  if (!text) mark('error', 'drawer renders empty: no list, no locked state');
+  const empty = !text || text.startsWith('evaluate failed');
+  if (empty) mark('error', 'drawer renders empty: no list, no locked state');
   await writeFinding(page, config.id, config);
-  if (!text) ctx.fail('CopilotThreadsDrawer renders an empty panel: no thread list and no locked state (runtime /info: threadEndpoints.list false).');
+  if (empty) ctx.fail(`CopilotThreadsDrawer renders an empty panel: no thread list and no locked state. ${await runtimeInfo(page)}`);
 };
 
 /** Headless Threads: the injectThreads list shows the conversation. */
@@ -550,7 +616,7 @@ export const runHeadlessThreadsAction: PageActionHandler = async (page, config, 
   const hasThread = (await list.locator('button').count()) > 1;
   if (!hasThread) mark('error', 'thread list stays empty after a conversation');
   await writeFinding(page, config.id, config);
-  if (!hasThread) ctx.fail('injectThreads lists no conversation after a chat on agent "support": only the New conversation button (runtime /info: threadEndpoints.list false).');
+  if (!hasThread) ctx.fail(`injectThreads lists no conversation after a chat on agent "support": only the New conversation button. ${await runtimeInfo(page)}`);
 };
 
 /** Inspector: the framework mounts cpk-web-inspector; the page's CSS puts the launcher bottom-left. */
@@ -710,15 +776,6 @@ export const runSubagentsPageAction: PageActionHandler = async (page, config, ro
 };
 
 Object.assign(FINDING_EVIDENCE, {
-  voice: [
-    { text: 'Voice backend setup', caption: 'Links to #backend on this same page, which does not exist; no transcriptionService code anywhere' },
-  ],
-  'threads-drawer': [
-    { text: 'shows its locked state when that feature is unavailable', caption: 'Drawer renders empty: no list, no locked state' },
-  ],
-  'headless-threads': [
-    { text: 'The list is server-authoritative', caption: 'No thread list endpoint on the runtime; page never says what serves it' },
-  ],
 } satisfies Record<string, DocEvidence[]>);
 
 Object.assign(FINDING_NOTES, {
