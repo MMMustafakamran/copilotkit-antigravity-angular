@@ -168,9 +168,7 @@
    "reachable": "sidebar",
    "status": "✅",
    "findings": [],
-   "notes": [
-    "Note: the backend setup link goes to the React voice page."
-   ],
+   "notes": [],
    "block": null,
    "links": [
     {
@@ -304,9 +302,7 @@
    "reachable": "sidebar",
    "status": "✅",
    "findings": [],
-   "notes": [
-    "Note: snippet has no imports; BackgroundToolArgs and resolveGradient never defined."
-   ],
+   "notes": [],
    "block": null,
    "links": [
     {
@@ -371,9 +367,7 @@
    "reachable": "sidebar",
    "status": "✅",
    "findings": [],
-   "notes": [
-    "Note: productCatalog is never defined; basicCatalog from the runtime guide works."
-   ],
+   "notes": [],
    "block": null,
    "links": [
     {
@@ -394,9 +388,7 @@
    "reachable": "sidebar",
    "status": "✅",
    "findings": [],
-   "notes": [
-    "Note: page never names an MCP app server; runtime config is only in the runtime guide."
-   ],
+   "notes": [],
    "block": null,
    "links": [
     {
@@ -492,9 +484,7 @@
    "reachable": "sidebar",
    "status": "✅",
    "findings": [],
-   "notes": [
-    "Note: the page never says where ApprovalToolsService is provided."
-   ],
+   "notes": [],
    "block": null,
    "links": [
     {
@@ -565,9 +555,7 @@
    "reachable": "sidebar",
    "status": "✅",
    "findings": [],
-   "notes": [
-    "Note: searchOrders is never defined on the page."
-   ],
+   "notes": [],
    "block": null,
    "links": [
     {
@@ -588,9 +576,7 @@
    "reachable": "sidebar",
    "status": "✅",
    "findings": [],
-   "notes": [
-    "Note: install step leaves out httpx; the snippet is a showcase excerpt."
-   ],
+   "notes": [],
    "block": null,
    "links": [
     {
@@ -611,9 +597,7 @@
    "reachable": "sidebar",
    "status": "✅",
    "findings": [],
-   "notes": [
-    "Note: readSessionToken() and verifySession() are never defined on the page."
-   ],
+   "notes": [],
    "block": null,
    "links": [
     {
@@ -622,7 +606,8 @@
      "loom": "https://www.loom.com/share/85aa39f6f6ad432f98d4a59b768f8790",
      "filmed": "2026-11-23"
     }
-   ]
+   ],
+   "excluded": "Backend section of the docs sidebar (owner 2026-11-23: Backend pages out of scope)"
   },
   {
    "id": "inspector",
@@ -643,7 +628,8 @@
      "loom": "https://www.loom.com/share/cea30eab82ae4d96911cda6f54b52619",
      "filmed": "2026-11-23"
     }
-   ]
+   ],
+   "excluded": "Backend section of the docs sidebar (owner 2026-11-23: Backend pages out of scope)"
   }
  ],
  "quickstartBlocked": "the backend snippet is a fragment and no runtime server or start step is given for Angular"
